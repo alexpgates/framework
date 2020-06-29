@@ -260,6 +260,25 @@ class Router implements BindingRegistrar, RegistrarContract
     }
 
     /**
+     * Create a redirect from an array of URIs to single route.
+     *
+     * @param  string  $uri
+     * @param  string  $destination
+     * @param  int  $status
+     * @return \Illuminate\Routing\Route
+     */
+    public function redirectAll($uris, $destination, $status = 302)
+    {
+        $redirects = [];
+        foreach ($uris as $uri) {
+            $redirects[] = $this->any($uri, '\Illuminate\Routing\RedirectController')
+                    ->defaults('destination', $destination)
+                    ->defaults('status', $status);
+        }
+        return $redirects;
+    }
+
+    /**
      * Register a new route that returns a view.
      *
      * @param  string  $uri

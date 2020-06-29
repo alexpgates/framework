@@ -1904,6 +1904,31 @@ class RoutingRouteTest extends TestCase
         $this->assertEquals(301, $response->getStatusCode());
     }
 
+    public function testRouteRedirectAll()
+    {
+        $container = new Container;
+        $router = new Router(new Dispatcher, $container);
+        $container->singleton(Registrar::class, function () use ($router) {
+            return $router;
+        });
+        $request = Request::create('contact-us', 'GET');
+        $container->singleton(Request::class, function () use ($request) {
+            return $request;
+        });
+        $urlGenerator = new UrlGenerator(new RouteCollection, $request);
+        $container->singleton(UrlGenerator::class, function () use ($urlGenerator) {
+            return $urlGenerator;
+        });
+        $router->get('contact_us', function () {
+            throw new Exception('Route should not be reachable.');
+        });
+        $router->redirectAll(['contact_us', 'contact-us'], 'contact');
+
+        $response = $router->dispatch($request);
+        $this->assertTrue($response->isRedirect('contact'));
+        $this->assertEquals(302, $response->getStatusCode());
+    }
+
     protected function getRouter()
     {
         $container = new Container;
